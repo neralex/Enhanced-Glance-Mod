@@ -1,0 +1,656 @@
+/**
+ * @package: Enhanced Glance Mod (RavenNuke(tm) 2.5+)
+ * @version: 2.0.1
+ * @file: glance.php
+ * @Glance Mod (version 2.2.1):
+ * copyright (c) 2001 by blulegend, Jack Kan http://www.www.phpbb.com
+ * modified by netclectic http://www.netclectic.com
+ * @Enhanced Glance Mod (version 1.0.0):
+ * copyright (c) 2006 by Martyn http://www.bonusnuke.com
+ * @RavenNuke(tm) Support: 2018 neralex
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ *
+ * @Description:  
+ * Show latest news and recent topics on any page.
+ * Customizable to show only news, only recent topics or both. 
+ * Will check the authorization of users and only show allowed topics.
+ * Supports authorization and message tracking.
+ * Admin-Panel to control all functions
+ * Uses templates.
+ *
+ * @New features (since version: 2.0.0)
+ * moved the most of all functions inside the glance.php 
+ * Admin-Panel to control all functions
+ * remove config file and put all function in a database table
+ * automatic database installation in the Admin-Panel
+ * remove all validation errors - xHTML validated!
+ * added some top posters function of block-ForumsCallapsing.php from RavenNuke(tm)
+ * added jQuery scroller for global announcements
+ * added new functions to set the display (on/off) for some sections
+ * added mysqli-statements and current filterings
+ *
+ * BEFORE ADDING THIS MOD TO YOUR FORUM, YOU SHOULD BACK UP ALL FILES RELATED TO THIS MOD
+ */
+
+#
+#-----[ FILES TO EDIT ]------------------------------------------
+#
+
+modules/Forums/includes/page_header.php
+modules/Forums/index.php
+
+modules/Forums/language/lang_english/lang_admin.php
+modules/Forums/language/lang_english/lang_main.php 
+Note: If you use another languages, then you must edit these files, too!
+
+modules/Forums/templates/subSilver/index_body.tpl 
+themes/YOURTHEME/forums/index_body.tpl 
+
+#
+#-----[ COPY ]------------------------------------------
+#
+
+modules/Forums/glance_mod folder > modules/Forums/
+modules/Forums/language/lang_english/lang_admin_glance.php > modules/Forums/language/lang_english/
+modules/Forums/templates/subSilver/glance_body.tpl > modules/Forums/templates/subSilver/
+modules/Forums/templates/subSilver/admin/glance_config.tpl > modules/Forums/templates/subSilver/admin/
+modules/Forums/admin/admin_glance.php > modules/Forums/admin/
+
+If the following file is exist, please make an backup and overwrite the file into your theme:
+
+themes/YOURTHEME/forums/glance_body.tpl > themes/YOURTHEME/forums/glance_body.tpl
+
+or
+
+copy themes/YOURTHEME/forums/glance_body.tpl > themes/YOURTHEME/forums/
+
+
+#
+#-----[ OPEN ]------------------------------------------------
+#
+/modules/Forums/index.php
+
+
+#
+#-----[ FIND ]-----------------------------------
+#
+
+//
+// Generate the page
+//
+$template->pparse('body');
+
+#
+#-----[ BEFORE, ADD ]-----------------------------------
+#
+
+// start glance mod
+include_once $phpbb_root_path . '/glance_mod/glance.' . $phpEx;
+// end glance mod
+
+#
+#-----[ OPEN ]------------------------------------------
+#
+
+modules/Forums/language/lang_english/lang_main.php
+Note: If you use another languages, then you must edit these files, too!
+
+#
+#-----[ FIND ]------------------------------------------
+#
+
+//
+// That's all, Folks!
+// -------------------------------------------------
+
+#
+#-----[ AFTER, ADD ] ------------------------------------------
+#
+
+// start glance mod
+$lang['EGM_Top_Posters'] = 'Top Posting Members';
+$lang['EGM_TopicsPopular'] = 'Popular Topics (by reply)';
+$lang['EGM_TopicsPopularView'] = 'Popular Topics (by view)';
+$lang['EGM_News_Heading'] = 'Latest Site News';
+$lang['EGM_Recent_Heading'] = 'Recent Topics';
+$lang['EGM_Latest_Members'] = 'Latest Members: ';
+// end glance mod
+
+#
+#-----[ OPEN ]------------------------------------------------
+#
+/modules/Forums/templates/subSilver/index_body.tpl
+                    and/or
+/themes/YOURTHEME/forums/index_body.tpl
+
+#
+#-----[ FIND ]-----------------------------------
+#
+   <table width="100%" cellspacing="0" cellpadding="2" border="0" align="center">
+   
+                (this is the first line in index_body.tpl)
+
+   
+#
+#-----[ BEFORE, ADD ]-----------------------------------
+# 
+
+<!-- MOD GLANCE BEGIN -->
+{GLANCE_OUTPUT}
+<!-- MOD GLANCE END -->
+
+#
+#-----[ OPEN ]------------------------------------------------
+#
+
+.htaccess
+
+#
+#-----[ FIND ]-----------------------------------
+# 
+
+RewriteRule ^forums.html modules.php?name=Forums [L]
+
+#
+#-----[ BEFORE, ADD ]-----------------------------------
+# 
+
+RewriteRule ^forum-news-([0-9]*)-recent-([0-9]*).html modules.php?name=Forums&file=index&news_offset=$1&recent_offset=$2 [L]
+RewriteRule ^forum-recent-([0-9]*)-news-([0-9]*).html modules.php?name=Forums&file=index&recent_offset=$1&news_offset=$2 [L]
+RewriteRule ^forum-news-([0-9]*).html modules.php?name=Forums&file=index&news_offset=$1 [L]
+RewriteRule ^forum-recent-([0-9]*).html modules.php?name=Forums&file=index&recent_offset=$1 [L]
+
+#
+#-----[ OPEN ]------------------------------------------------
+#
+
+ShortLinks/GT-Forums.php
+
+#
+#-----[ FIND ]-----------------------------------
+# 
+
+'"(?<!/)modules.php\?name=Forums(?!&)"',
+
+#
+#-----[ BEFORE, ADD ]-----------------------------------
+# 
+
+'"(?<!/)modules.php\?name=Forums&amp;file=index&amp;news_offset=([0-9]*)&amp;recent_offset=([0-9]*)"',
+'"(?<!/)modules.php\?name=Forums&amp;file=index&amp;recent_offset=([0-9]*)&amp;news_offset=([0-9]*)"',
+'"(?<!/)modules.php\?name=Forums&amp;file=index&amp;news_offset=([0-9]*)"',
+'"(?<!/)modules.php\?name=Forums&amp;file=index&amp;recent_offset=([0-9]*)"',
+
+#
+#-----[ FIND ]-----------------------------------
+# 
+
+'forums.html',
+
+#
+#-----[ BEFORE, ADD ]-----------------------------------
+# 
+
+'forum-news-\\1-recent-\\2.html',
+'forum-recent-\\1-news-\\2.html',
+'forum-news-\\1.html',
+'forum-recent-\\1.html',
+
+#
+#-----[ SAVE/CLOSE ALL FILES ]---------------------------------
+#
+# EoM
+
+#################################################################
+## Update from version 1.0.0
+#################################################################
+
+#
+#-----[ COPY ]------------------------------------------
+#
+
+modules/Forums/glance_mod folder > modules/Forums/
+modules/Forums/language/lang_english/lang_admin_glance.php > modules/Forums/language/lang_english/
+
+modules/Forums/templates/subSilver/admin/glance_config.tpl > modules/Forums/templates/subSilver/admin/
+modules/Forums/admin/admin_glance.php > modules/Forums/admin/
+
+please make an backup and overwrite the file:
+modules/Forums/templates/subSilver/glance_body.tpl > modules/Forums/templates/subSilver/glance_body.tpl
+
+please make an backup and overwrite the file:
+themes/YOURTHEME/forums/glance_body.tpl > themes/YOURTHEME/forums/glance_body.tpl
+
+#
+#-----[ OPEN ]------------------------------------------
+#
+
+modules/Forums/includes/functions.php
+
+#
+#-----[ FIND & REMOVE ]------------------------------------------
+#
+
+// MOD START - TOP 'X' USERS MOD - AbelaJohnB
+//                This function will be used to acquire the "Top 'x'" members of your forum.
+function top_posters($str_input)
+{
+        global $db, $phpEx;
+        $sql = "SELECT u.user_id, u.username, u.user_posts, count(u.user_id) as user_posts
+        FROM " . USERS_TABLE . " u, " . POSTS_TABLE . " p
+        WHERE (u.user_id <> " . ANONYMOUS . ") AND (u.user_id = p.poster_id)
+        GROUP BY user_id, username
+        ORDER BY user_posts DESC
+        LIMIT $str_input";
+        if ( !($result = $db->sql_query($sql)) )
+        {
+                message_die(GENERAL_ERROR, 'Could not query forum top poster information', '', __LINE__, __FILE__, $sql);
+        }
+        // $top_posters = array();
+        while( $row = $db->sql_fetchrow($result) )
+        {
+                $top_posters .= '<a href="' . append_sid("profile.$phpEx?mode=viewprofile&amp;" . POST_USERS_URL . "=" . $row['user_id']) . '">' . $row['username'] . '</a>(' . $row['user_posts'] . '), ';
+        }
+  return $top_posters;
+}
+// MOD END - TOP 'X' USERS MOD - AbelaJohnB
+
+#
+#-----[ OPEN ]------------------------------------------
+#
+
+modules/Forums/includes/page_header.php
+
+#
+#-----[ FIND & REMOVE ]------------------------------------------
+#
+
+        'L_TOPICSPOPULAR' => $lang['TopicsPopular'],
+        'L_TOPICSPOPULARVIEW' => $lang['TopicsPopularView'],
+
+#
+#-----[ OPEN ]------------------------------------------------
+#
+
+/modules/Forums/index.php
+
+#
+#-----[ FIND ]-----------------------------------
+#
+
+	include($phpbb_root_path . 'glance.'.$phpEx);
+
+#
+#-----[ REPLACE IT WITH ]-----------------------------------
+#
+
+// start glance mod
+include_once $phpbb_root_path . '/glance_mod/glance.' . $phpEx;
+// end glance mod
+
+#
+#-----[ FIND & REMOVE ]-----------------------------------------
+#
+if ( $board_config['global_enable']== 1  && $board_config['marquee_disable']== 0  )
+{
+   $template->assign_block_vars('switch_disable_global_marquee', array());
+}
+else if ( $board_config['global_enable']== 1  &&  $board_config['marquee_disable']== 1  )
+{
+   $template->assign_block_vars('switch_enable_global_marquee', array());
+}
+
+#
+#-----[ FIND & REMOVE ]-----------------------------------------
+#
+
+	'TOP_POSTERS' => top_posters('10'), // Replace the number to display however members many you want :)
+	'L_TOP_POSTERS' => $lang['Top_Posters'],
+    	'GLOBAL_TITLE' => $board_config['global_title'],
+    	'GLOBAL_ANNOUNCEMENT' => str_replace(array('<br />', '<br>'), "", $board_config['global_announcement']),
+
+#
+#-----[ FIND & REMOVE ]-----------------------------------------
+#
+
+	//
+	// Okay, let's build the topic recent and popular
+	//
+$active_topics_sql="SELECT a.topic_id,a.topic_title,  a.topic_replies,  a.topic_last_post_id, c.post_time
+			FROM nuke_bbtopics a, nuke_users b,nuke_bbposts c,nuke_bbforums d
+			where a.topic_last_post_id=c.post_id and b.user_id=c.poster_id
+				and d.forum_id=a.forum_id
+				and d.auth_view=0
+			ORDER BY topic_last_post_id DESC
+			LIMIT 5";
+$active_topics = $db->sql_query($active_topics_sql);
+
+$active_topics_sql2="SELECT a.topic_id,a.topic_title,  a.topic_replies,  a.topic_last_post_id, c.post_time
+			FROM nuke_bbtopics a, nuke_users b, nuke_bbposts c, nuke_bbforums d
+			where a.topic_last_post_id=c.post_id and b.user_id=c.poster_id
+				and d.forum_id=a.forum_id
+				and d.auth_view=0
+			ORDER BY topic_replies DESC
+			LIMIT 5";
+$active_topics2 = $db->sql_query($active_topics_sql2);
+
+$active_topics_sql3="SELECT a.topic_id,a.topic_title,  a.topic_views, a.topic_replies,  a.topic_last_post_id, c.post_time
+			FROM nuke_bbtopics a, nuke_users b, nuke_bbposts c, nuke_bbforums d
+			where a.topic_last_post_id=c.post_id and b.user_id=c.poster_id
+				and d.forum_id=a.forum_id
+				and d.auth_view=0
+			ORDER BY topic_views DESC
+			LIMIT 5";
+$active_topics3 = $db->sql_query($active_topics_sql3);
+
+	while (($line = mysql_fetch_array($active_topics)) and ($line2 = mysql_fetch_array($active_topics2)) and ($line3 = mysql_fetch_array($active_topics3)))
+	{
+		if (strlen($line['topic_title']) > 40)
+		{
+			$line_topic_title = substr($line['topic_title'], 0, 40)." ...";
+		}
+		else
+		{
+			$line_topic_title = $line['topic_title'];
+		}
+		if (strlen($line2['topic_title']) > 40)
+		{
+			$line_topic_title2 = substr($line2['topic_title'], 0, 40)." ...";
+		}
+		else
+		{
+			$line_topic_title2 = $line2['topic_title'];
+		}
+		if (strlen($line3['topic_title']) > 40)
+		{
+			$line_topic_title3 = substr($line3['topic_title'], 0, 40)." ...";
+		}
+		else
+		{
+			$line_topic_title3 = $line3['topic_title'];
+		}
+		$lastpost = '<a href="' . append_sid("viewtopic.$phpEx?"  . POST_TOPIC_URL . '=' . $line['topic_id']) . '">' . $line_topic_title . '</a>';
+		$poppost = '<a href="' . append_sid("viewtopic.$phpEx?"  . POST_TOPIC_URL . '=' . $line2['topic_id']) . '">' . $line_topic_title2 . '</a>';
+		$poppostc = $line2['topic_replies'];
+		$popviewpost = '<a href="' . append_sid("viewtopic.$phpEx?"  . POST_TOPIC_URL . '=' . $line3['topic_id']) . '">' . $line_topic_title3 . '</a>';
+		$popviewpostc = $line3['topic_views'];
+		$template->assign_block_vars('topicrecentpopular', array(
+			'TOPICSPOPULAR' => $poppost,
+			'TOPICSPOPULARC' => $poppostc,
+			'TOPICSPOPULARVIEW' => $popviewpost,
+			'TOPICSPOPULARVIEWC' => $popviewpostc,
+			'TOPICSRECENT' => $lastpost)
+		);
+	}
+
+#
+#-----[ OPEN ]------------------------------------------------
+#
+
+/modules/Forums/admin/admin_board.php
+
+#
+#-----[ FIND & REMOVE ]------------------------------------------------
+#
+
+$enable_global_yes = ( $new['global_enable'] ) ? "checked=\"checked\"" : "";
+$enable_global_no = ( !$new['global_enable'] ) ? "checked=\"checked\"" : "";
+
+$marquee_disable_yes = ( $new['marquee_disable'] ) ? "checked=\"checked\"" : "";
+$marquee_disable_no = ( !$new['marquee_disable'] ) ? "checked=\"checked\"" : "";
+
+#
+#-----[ FIND & REMOVE ]------------------------------------------------
+#
+
+$new['global_announcement'] = str_replace('"', '&quot;', $new['global_announcement']);
+
+#
+#-----[ FIND & REMOVE ]------------------------------------------------
+#
+
+   "L_GLOBAL_TITLE" => $lang['Global_title'],
+   "L_GLOBAL_TITLE_EXPLAIN" => $lang['Global_title_explain'],
+   "L_GLOBAL" => $lang['Global'],
+   "L_GLOBAL_EXPLAIN" => $lang['Global_explain'],
+   "L_ENABLE_GLOBAL" => $lang['Enable_global'],
+   "L_ENABLE_GLOBAL_EXPLAIN" => $lang['Enable_global_explain'],
+   "L_DISABLE_MARQUEE" => $lang['Global_marquee_effect'],
+   "L_DISABLE_MARQUEE_EXPLAIN" => $lang['Global_marquee_effect_explain'],
+
+#
+#-----[ FIND & REMOVE ]------------------------------------------------
+#
+
+   "GLOBAL_TITLE" => $new['global_title'],
+   "GLOBAL_ANNOUNCEMENT" => $new['global_announcement'],
+   "S_ENABLE_GLOBAL_YES" => $enable_global_yes,
+   "S_ENABLE_GLOBAL_NO" => $enable_global_no,
+   "S_DISABLE_MARQUEE_YES" => $marquee_disable_yes,
+   "S_DISABLE_MARQUEE_NO" => $marquee_disable_no,
+
+#
+#-----[ OPEN ]------------------------------------------------
+#
+
+/modules/Forums/language/lang_english/lang_admin.php
+
+#
+#-----[ FIND & REMOVE ]------------------------------------------------
+#
+
+$lang['Global_title'] = 'Global announcement title';
+$lang['Global_title_explain'] = 'Enter a different title for the announcement if the default "Global Announcement" is not suitable.';
+$lang['Global'] = 'Global Announcement';
+$lang['Global_explain'] = 'Enter the special announcement you want displayed on your forums main index page here.';
+$lang['Enable_global'] = 'Enable Global Announcement';
+$lang['Enable_global_explain'] = 'If you enable this, a global announcement will be displayed on your main index page.';
+$lang['Global_marquee_effect'] = 'Enable the scrolling global announcement effect';
+$lang['Global_marquee_effect_explain'] = 'If you enable this, your global announcement will scroll on the main index.';
+
+#
+#-----[ OPEN ]------------------------------------------
+#
+
+modules/Forums/language/lang_english/lang_main.php
+
+#
+#-----[ FIND ]------------------------------------------
+#
+
+$lang['Top_Posters'] = 'Top Posting Members';
+$lang['TopicsPopular'] = "Popular Topics (by reply)";
+$lang['TopicsPopularView'] = "Popular Topics (by view)";
+
+#
+#-----[ REPLACE IT WITH ]------------------------------------------------
+#
+
+// start glance mod
+$lang['EGM_Top_Posters'] = 'Top Posting Members';
+$lang['EGM_TopicsPopular'] = 'Popular Topics (by reply)';
+$lang['EGM_TopicsPopularView'] = 'Popular Topics (by view)';
+$lang['EGM_News_Heading'] = 'Latest Site News';
+$lang['EGM_Recent_Heading'] = 'Recent Topics';
+$lang['EGM_Latest_Members'] = 'Latest Members: ';
+// end glance mod
+
+#
+#-----[ OPEN ]------------------------------------------------
+#
+
+/modules/Forums/templates/subSilver/admin/board_config_body.tpl
+
+#
+#-----[ FIND & REMOVE ]------------------------------------------------
+#
+   <tr>
+      <td class="row1">{L_GLOBAL_TITLE}<br /><span class="gensmall">{L_GLOBAL_TITLE_EXPLAIN}</span></td>
+      <td class="row2"><input class="post" type="text" maxlength="55" size="40" name="global_title" value="{GLOBAL_TITLE}" /></td>
+   </tr>
+   <tr>
+      <td class="row1">{L_GLOBAL}<br /><span class="gensmall">{L_GLOBAL_EXPLAIN}</span></td>
+      <td class="row2"><textarea name="global_announcement" rows="5" cols="30" maxlength="255" onkeydown="return ismaxlength(this)">{GLOBAL_ANNOUNCEMENT}</textarea></td>
+   </tr>
+   <tr>
+      <td class="row1">{L_ENABLE_GLOBAL}<br /><span class="gensmall">{L_ENABLE_GLOBAL_EXPLAIN}</span></td>
+      <td class="row2"><input type="radio" name="global_enable" value="1" {S_ENABLE_GLOBAL_YES} /> {L_YES}&nbsp;&nbsp;<input type="radio" name="global_enable" value="0" {S_ENABLE_GLOBAL_NO} /> {L_NO}</td>
+   </tr>
+   <tr>
+      <td class="row1">{L_DISABLE_MARQUEE}<br /><span class="gensmall">{L_DISABLE_MARQUEE_EXPLAIN}</span></td>
+      <td class="row2"><input type="radio" name="marquee_disable" value="1" {S_DISABLE_MARQUEE_YES} /> {L_YES}&nbsp;&nbsp;<input type="radio" name="marquee_disable" value="0" {S_DISABLE_MARQUEE_NO} /> {L_NO}</td>
+   </tr>
+
+#
+#-----[ OPEN ]------------------------------------------------
+#
+
+/modules/Forums/templates/subSilver/admin/page_header.tpl
+
+#
+#-----[ FIND & REMOVE ]------------------------------------------------
+#
+
+<script type="text/javascript">
+function ismaxlength(obj){
+var mlength=obj.getAttribute? parseInt(obj.getAttribute("maxlength")) : ""
+if (obj.getAttribute && obj.value.length>mlength)
+obj.value=obj.value.substring(0,mlength)
+}
+</script>
+
+#
+#-----[ OPEN ]------------------------------------------------
+#
+/modules/Forums/templates/subSilver/index_body.tpl
+                    and/or
+/themes/YOURTHEME/forums/index_body.tpl
+
+#
+#-----[ FIND ]-----------------------------------
+#
+
+(this is the first line in index_body.tpl)
+
+	<table width="100%" cellspacing="0" cellpadding="4" border="0" align="center">
+  <tr>
+   <td width="100%" colspan="2" valign="top">
+      <!-- MOD GLANCE BEGIN -->
+      {GLANCE_OUTPUT}
+      <!-- MOD GLANCE END -->
+      </tr>
+    </table>
+
+#
+#-----[ REPLACE IT WITH ]-----------------------------------
+#
+
+<!-- MOD GLANCE BEGIN -->
+{GLANCE_OUTPUT}
+<!-- MOD GLANCE END -->
+
+#
+#-----[ SAVE/CLOSE ALL FILES ]---------------------------------
+#
+
+#
+#-----[ DELETE OLD FILES ]------------------------------------------
+#
+
+themes/Your_Theme/forums/images/announce.gif
+themes/Your_Theme/forums/images/top_posters.gif
+themes/Your_Theme/forums/images/w_info.gif
+modules/Forums/glance.php
+modules/Forums/glance_config.php
+
+#
+#-----[ INSTALL NEW DATABASE TABLE ]------------------------------------------
+#
+
+Go now into the forums ACP, search in right bar the "Glance" option and click on "Management".
+The first run will be install the new database table. 
+
+#
+#-----[ REMOVE OLD DATABASE INSERTS ]------------------------------------------
+#
+
+To remove the old database inserts from the forums config table, 
+open PHPMYADMIN and search in your database the table _bbconfig.
+
+Delete the following fields of the table _bbconfig:
+
+[x] global_title
+[x] global_announcement
+[x] global_enable
+[x] marquee_disable
+
+# EoM
+
+
+#################################################################
+##                            CREDITS
+##                INSPIRED BY THE FOLLOWING MODS
+#################################################################
+## Mod Title:    At a glance (recent news and/or topics)
+## Author:       blulegend
+## Description:  Show latest news and recent topics on any page.
+##               Customizable to show only news, only recent topics,
+##               or both. Will check the authorization of users
+##               and only show allowed topics.
+##
+##               - You can also customize the bullet for each topic.
+##               - Supports authorization and message tracking.
+##               - Uses templates.
+##############################################################
+## MOD Title: Scrolling Global Announcement on Index
+## Ported by: Martyn of BonusNuke
+##            http://www.bonusnuke.com
+## MOD Description: Adds a Global Announcement box on your forum index page.
+##                  Announcements controlled within the forum ACP - turn on or off the announcements,
+##                  turn on or off the scrolling effect.
+## ORIGINAL MOD DETAILS:..............................
+## MOD Title: Scrolling Global Announcement on Index
+## MOD Author: acoolwelshbloke < acoolwelshbloke@tec2spec.co.uk > (Paul Norman) http://www.tec2spec.co.uk
+## License: http://opensource.org/licenses/gpl-license.php GNU General Public License v2
+########################################################
+## Mod Title:    The last Five and the Five popular (answers/views) on index.php
+## Author:       Andrey Politov aka Sergeant < andypolv@mail.ru >
+## Description:   Adds small table (2 columns) on the top of the forum index with  5 popular
+## (with maximum answers) and 5 popular (with maximum views). It helps to keep on the top interesting topics.
+## Ported for Nuke by Telli telli@codezwiz.com http://codezwiz.com
+##############################################################
+## MOD Title: Top X Posters
+## MOD Author: AbelaJohnB <abela@phpbb.com> (John B. Abela) http://www.JohnAbela.Com/
+## Modified by Maku to work for bbtonuke (version 2.0.6) from http://phpnuke-est.net
+## MOD Description: Allows you to post the "Top 'x'" members of your forum on your forum.
+## Author Notes:
+## Copyright © John B. Abela, < abela@johnabela.com >
+## I do not support my MOD's anywhere except at http://www.phpBB.com/ so please visit there
+## for support. If you intend to take my work and modify it, you must retain my above
+## Copyright within any install file. This does not mean you have to ask me to -use- this MOD,
+## but that does mean you cannot -distribute- this MOD, in modified or non-modified format,
+## without my copyright left intact. Contact me at: abela@johnabela.com - www.JohnAbela.Com
+## Improoved by neralex with some functions of the ForumsCallapsing block (c)RavenNuke(tm)
+##############################################################
+## MOD Title: Display Jumpbox On Index MOD
+## MOD Author: morpheus2matrix < morpheus@2037.biz > (Morpheus) http://morpheus.2037.biz
+## MOD Description: This MOD will show the jumpbox on the forum index
+## MOD Version: 1.0.3
+##############################################################
+## Author Notes:
+##
+## THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY
+## EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+## TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+## FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+## THE AUTHOR OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+## INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+## SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+## PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+## ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+## LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+## ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+## ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##
+##############################################################
